@@ -74,7 +74,7 @@ const int maxanimDelay = 500;    // maximum delay
 uint8_t fHue = 0;               // start color for flat color mode
 uint8_t gHue = 0;               // rotating "base color" for fire animation an
 
-bool gReverseDirection = true;  // for twinkling animation
+bool gReverseDirection = false;  // for twinkling animation
 
 byte led = 13;
 
@@ -253,11 +253,13 @@ void loop() {
 
       Serial.println("Flat Color");
 
+      myEnc.write(fHue);
+
       while (mode == 1) {
 
         uint16_t i;
 
-        myEnc.write(fHue);
+        
 
         for (i = 0; i < NUM_LEDS; i++) {
           //leds[i] = CHSV(hue, 255, 255); // set random color
@@ -269,7 +271,7 @@ void loop() {
         if (newEncoderPos != oldEncoderPos) {
           oldEncoderPos = newEncoderPos;
         }
-        fHue = newEncoderPos;
+        fHue = 3*newEncoderPos;
         #ifdef DEBUG
           Serial.print("Mode: ");
           Serial.print(mode);
