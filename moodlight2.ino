@@ -36,15 +36,23 @@ int mode = 4;                 // animation modes
 const int maxModes = 6;       // number of modes (cycling, starting from 1 so 4 modes)
 
 // FastLED definitions
+#define FASTLED_ESP8266_RAW_PIN_ORDER
 #define FASTLED_ALLOW_INTERRUPTS 0 // needed to work
 #include <FastLED.h>               // FastLED Animation library
 
-#define LED_PIN D3 // controlpin for ws2812
-// strangely has to be placed on pin D0 !?
+#define LED_PIN D0 // controlpin for ws2812
 
-#define NUM_LEDS 64 // number of leds in matrix
-#define NUM_ROWS 8  // number of rows in matrix
-#define NUM_COLS 8  // number of cols in matrix
+//#define TEST // test matrix with 8x8 pixel
+
+#ifdef TEST 
+  #define NUM_ROWS 8  // number of rows in matrix
+  #define NUM_COLS 8  // number of cols in matrix
+  #define NUM_LEDS 64 // number of leds in matrix
+#else
+  #define NUM_ROWS 11  // number of rows in matrix
+  #define NUM_COLS 11  // number of cols in matrix
+  #define NUM_LEDS 121 // number of leds in matrix
+#endif
 
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812
@@ -72,7 +80,7 @@ const int maxanimDelay = 500; // maximum delay
 uint8_t fHue = 0; // start color for flat color mode
 uint8_t gHue = 0; // rotating "base color" for fire animation an
 
-bool gReverseDirection = false; // for twinkling animation
+bool gReverseDirection = true; // for twinkling animation
 
 byte led = 13;
 
@@ -485,6 +493,8 @@ void loop()
   case 6:
     Serial.println("Fire!");
 
+    gReverseDirection = false;
+
     while (mode == 6)
     {
       Fire2012();
@@ -492,6 +502,7 @@ void loop()
       server.handleClient();
       MDNS.update();
     }
+    gReverseDirection = true;
     break;
 
   } // end switch
