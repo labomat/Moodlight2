@@ -68,7 +68,7 @@ const int animDelaytwinkle = 20; // delay start value for animation "Twinkle"
 const int animDelayRainbow = 50; // delay start value for animation "Rainbow"
 
 const int minanimDelay = 1;      // minimum delay
-const int maxanimDelay = 100;    // maximum delay
+const int maxanimDelay = 500;    // maximum delay
 
 uint8_t fHue = 0;               // start color for flat color mode
 uint8_t gHue = 0;               // rotating "base color" for fire animation an
@@ -76,6 +76,8 @@ uint8_t gHue = 0;               // rotating "base color" for fire animation an
 bool gReverseDirection = true;  // for twinkling animation
 
 byte led = 13;
+
+#define DEBUG                   // Debugging on
 
 // web server configuration
 
@@ -156,8 +158,7 @@ void setup() {
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(MASTER_BRIGHTNESS);
 
-  // starting wifi
-  Serial.println("Booting");
+  Serial.println("Booting Moodlight2 ...");
 
   // Starting wifi manager
 
@@ -207,7 +208,7 @@ void setup() {
     });
     ArduinoOTA.begin();
   
-    Serial.println("Ready");
+    Serial.println("Moodlight2 ready!");
 
   // starting server
 
@@ -255,11 +256,13 @@ void loop() {
           oldEncoderPos = newEncoderPos;
         }
         fHue = newEncoderPos;
-        Serial.print("mode: ");
-        Serial.print(mode);
-        Serial.print(" | ");
-        Serial.print("hue: ");
-        Serial.println(fHue);
+        #ifdef DEBUG
+          Serial.print("Mode: ");
+          Serial.print(mode);
+          Serial.print(" | ");
+          Serial.print("Hue: ");
+          Serial.println(fHue);
+        #endif
 
         FastLED.show();
         ArduinoOTA.handle();
@@ -295,14 +298,20 @@ void loop() {
           FastLED.show();
           yield(); // needed to prevent soft reset by esp watchdog timer
 
-
           long newEncoderPos = constrain((myEnc.read()), minanimDelay, maxanimDelay);
 
           if (newEncoderPos != oldEncoderPos) {
             oldEncoderPos = newEncoderPos;
           }
-          Serial.println(newEncoderPos);
           animDelay = newEncoderPos;
+
+        #ifdef DEBUG
+          Serial.print("Mode: ");
+          Serial.print(mode);
+          Serial.print(" | ");
+          Serial.print("Delay: ");
+          Serial.println(animDelay);
+        #endif
         }
         server.handleClient();
         MDNS.update();
@@ -333,13 +342,18 @@ void loop() {
         long newEncoderPos = constrain((2 * myEnc.read()), minanimDelay, maxanimDelay);
 
         if (newEncoderPos != oldEncoderPos) {
-          Serial.print("Encoder read: ");
-          Serial.println(myEnc.read());
           oldEncoderPos = newEncoderPos;
         }
         animDelay = newEncoderPos;
-        Serial.print("Anim delay: ");
-        Serial.println(animDelay);
+
+        #ifdef DEBUG
+          Serial.print("Mode: ");
+          Serial.print(mode);
+          Serial.print(" | ");
+          Serial.print("Delay: ");
+          Serial.println(animDelay);
+        #endif
+
         FastLED.delay(animDelay);
 
         server.handleClient();
@@ -377,7 +391,6 @@ void loop() {
 
       animDelay = animDelaytwinkle;
       myEnc.write(animDelay);
-      Serial.println(animDelay);
 
       while (mode == 4) {
 
@@ -390,8 +403,15 @@ void loop() {
         if (newEncoderPos != oldEncoderPos) {
           oldEncoderPos = newEncoderPos;
         }
-        Serial.println(newEncoderPos);
         animDelay = newEncoderPos;
+
+        #ifdef DEBUG
+          Serial.print("Mode: ");
+          Serial.print(mode);
+          Serial.print(" | ");
+          Serial.print("Delay: ");
+          Serial.println(animDelay);
+        #endif
 
         server.handleClient();
         MDNS.update();
@@ -424,8 +444,14 @@ void loop() {
         }
         animDelay = newEncoderPos;
         FastLED.delay(animDelay);
-        Serial.print("Delay: ");
-        Serial.println(animDelay);
+        
+        #ifdef DEBUG
+          Serial.print("Mode: ");
+          Serial.print(mode);
+          Serial.print(" | ");
+          Serial.print("Delay: ");
+          Serial.println(animDelay);
+        #endif
 
         server.handleClient();
         MDNS.update();
