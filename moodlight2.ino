@@ -10,7 +10,6 @@
 
     CC-BY SA 2020/21 Kai Laborenz
 
-
 */
 
 #include <ESP8266WiFi.h>
@@ -18,81 +17,80 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
-#include <ArduinoOTA.h>     // ota updates
-#include <strings_en.h>     // wifi manager
-#include <WiFiManager.h>    // wifi manager
+#include <ArduinoOTA.h>  // ota updates
+#include <strings_en.h>  // wifi manager
+#include <WiFiManager.h> // wifi manager
 
-#include <Encoder.h>        // Rotary encoder
+#include <Encoder.h> // Rotary encoder
 // to enable Encoder library to work with wemos d1 I had to replace Encoder.h with
 // https://raw.githubusercontent.com/RLars/Encoder/master/Encoder.h according to
 // https://github.com/PaulStoffregen/Encoder/issues/40
-#include <Bounce2.h>         // bebounce routine for switches
+#include <Bounce2.h> // bebounce routine for switches
 
-Encoder myEnc(D1, D2);       // initialize Encoder
-long oldEncoderPos  = 0;
-#define SWITCH_PIN D7        // rotary encoder switch pin
+Encoder myEnc(D1, D2); // initialize Encoder
+long oldEncoderPos = 0;
+#define SWITCH_PIN D7 // rotary encoder switch pin
 
-Bounce modeSwitch = Bounce();  // Instantiate Bounce object
-int mode = 4;               // animation modes
-const int maxModes = 6;     // number of modes (cycling, starting from 1 so 4 modes)
+Bounce modeSwitch = Bounce(); // Instantiate Bounce object
+int mode = 4;                 // animation modes
+const int maxModes = 6;       // number of modes (cycling, starting from 1 so 4 modes)
 
 // FastLED definitions
-
 #define FASTLED_ALLOW_INTERRUPTS 0 // needed to work
-#include <FastLED.h>        // FastLED Animation library
+#include <FastLED.h>               // FastLED Animation library
 
-#define LED_PIN D3          // controlpin for ws2812
+#define LED_PIN D3 // controlpin for ws2812
 // strangely has to be placed on pin D0 !?
 
-#define NUM_LEDS 64        // number of leds in matrix
-#define NUM_ROWS 8         // number of rows in matrix
-#define NUM_COLS 8         // number of cols in matrix
+#define NUM_LEDS 64 // number of leds in matrix
+#define NUM_ROWS 8  // number of rows in matrix
+#define NUM_COLS 8  // number of cols in matrix
 
 #define COLOR_ORDER GRB
-#define CHIPSET     WS2812
+#define CHIPSET WS2812
 #define FRAMES_PER_SECOND 60
 
-#define MASTER_BRIGHTNESS   96
+#define MASTER_BRIGHTNESS 96
 #define STARTING_BRIGHTNESS 64
-#define FADE_IN_SPEED       32
-#define FADE_OUT_SPEED      20
-#define DENSITY            255
+#define FADE_IN_SPEED 32
+#define FADE_OUT_SPEED 20
+#define DENSITY 255
 
 int brightness = STARTING_BRIGHTNESS;
 
 CRGB leds[NUM_LEDS];
 
-int animDelay = 0;               // delay of animation loop in ms (controlled by encoder)
+int animDelay = 0; // delay of animation loop in ms (controlled by encoder)
 const int animDelaySplash = 50;
 const int animDelayParty = 250;  // delay start value for animation "Party Time"
 const int animDelaytwinkle = 20; // delay start value for animation "Twinkle"
 const int animDelayRainbow = 50; // delay start value for animation "Rainbow"
 
-const int minanimDelay = 1;      // minimum delay
-const int maxanimDelay = 500;    // maximum delay
+const int minanimDelay = 1;   // minimum delay
+const int maxanimDelay = 500; // maximum delay
 
-uint8_t fHue = 0;               // start color for flat color mode
-uint8_t gHue = 0;               // rotating "base color" for fire animation an
+uint8_t fHue = 0; // start color for flat color mode
+uint8_t gHue = 0; // rotating "base color" for fire animation an
 
-bool gReverseDirection = false;  // for twinkling animation
+bool gReverseDirection = false; // for twinkling animation
 
 byte led = 13;
 
-#define DEBUG                   // Debugging on
+#define DEBUG // Debugging on
 
 // web server configuration
 
 ESP8266WebServer server(80);
 
-void handleRoot() {
+void handleRoot()
+{
   digitalWrite(led, 1);
   server.send(200, "text/plain", "hello from esp8266!");
   digitalWrite(led, 0);
 }
 
-
-void handleSet() {
-
+void handleSet()
+{
   // main function to handle control commands from web to device
 
   String message = "";
@@ -140,7 +138,8 @@ void handleSet() {
   server.send(200, "text/html", SendHTML(mode, brightness, fHue));
 }
 
-void handleNotFound() {
+void handleNotFound()
+{
   digitalWrite(led, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
@@ -150,16 +149,16 @@ void handleNotFound() {
   message += "\nArguments: ";
   message += server.args();
   message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
+  for (uint8_t i = 0; i < server.args(); i++)
+  {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
   digitalWrite(led, 0);
 }
 
-
-void setup() {
-
+void setup()
+{
   Serial.begin(115200);
 
   // switch for mode change with rotary encoder push button
@@ -175,13 +174,10 @@ void setup() {
   Serial.println("Booting Moodlight 2 ...");
 
   // Starting wifi manager
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("MOODLIGHT2");
 
-    WiFiManager wifiManager;
-    wifiManager.autoConnect("MOODLIGHT2");
-
-  //
   // starting ota update capability
-  //
 
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
@@ -196,189 +192,198 @@ void setup() {
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
-    ArduinoOTA.onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else // U_SPIFFS
-        type = "filesystem";
+  ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
 
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    });
-    ArduinoOTA.onEnd([]() {
-      Serial.println("\nEnd");
-    });
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    });
-    ArduinoOTA.onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
-    ArduinoOTA.begin();
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  });
 
-    Serial.println("Moodlight2 ready!");
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR)
+      Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR)
+      Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR)
+      Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR)
+      Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR)
+      Serial.println("End Failed");
+  });
+
+  ArduinoOTA.begin();
+
+  Serial.println("Moodlight2 ready!");
 
   // starting server
-
-    if (MDNS.begin("esp8266")) {
-      Serial.println("MDNS responder started");
-    }
-
+  if (MDNS.begin("esp8266"))
+  {
+    Serial.println("MDNS responder started");
+  }
 
   // server commands
-
-  server.on("/", handleRoot); // default web page
+  server.on("/", handleRoot);   // default web page
   server.on("/set", handleSet); // set mode
   server.onNotFound(handleNotFound);
 
   server.begin();
   Serial.println("HTTP server started");
   delay(1000);
-
 }
 
-void loop() {
-
-  switch (mode) {
+void loop()
+{
+  switch (mode)
+  {
 
     ///////    ANIMATION 1    ///////
 
-    case 1:
+  case 1:
 
-      Serial.println("Flat Color");
+    Serial.println("Flat Color");
 
-      myEnc.write(fHue);
+    myEnc.write(fHue);
 
-      while (mode == 1) {
+    while (mode == 1)
+    {
 
-        uint16_t i;
+      uint16_t i;
 
-        
-
-        for (i = 0; i < NUM_LEDS; i++) {
-          //leds[i] = CHSV(hue, 255, 255); // set random color
-          fill_solid(leds, NUM_LEDS, CHSV(fHue, 255, 255));
-        }
-
-        // read hue from encoder
-        long newEncoderPos = constrain((myEnc.read()), 0, 255);
-        if (newEncoderPos != oldEncoderPos) {
-          oldEncoderPos = newEncoderPos;
-        }
-        fHue = 3*newEncoderPos;
-        #ifdef DEBUG
-          Serial.print("Mode: ");
-          Serial.print(mode);
-          Serial.print(" | ");
-          Serial.print("Hue: ");
-          Serial.println(fHue);
-        #endif
-
-        FastLED.show();
-        ArduinoOTA.handle();
-
-        server.handleClient();
-        MDNS.update();
-
-        FastLED.delay(1000 / FRAMES_PER_SECOND);
-
+      for (i = 0; i < NUM_LEDS; i++)
+      {
+        //leds[i] = CHSV(hue, 255, 255); // set random color
+        fill_solid(leds, NUM_LEDS, CHSV(fHue, 255, 255));
       }
-      break;
 
+      // read hue from encoder
+      long newEncoderPos = constrain((myEnc.read()), 0, 255);
+      if (newEncoderPos != oldEncoderPos)
+      {
+        oldEncoderPos = newEncoderPos;
+      }
+      fHue = 3 * newEncoderPos;
+#ifdef DEBUG
+      Serial.print("Mode: ");
+      Serial.print(mode);
+      Serial.print(" | ");
+      Serial.print("Hue: ");
+      Serial.println(fHue);
+#endif
+
+      FastLED.show();
+      ArduinoOTA.handle();
+
+      server.handleClient();
+      MDNS.update();
+
+      FastLED.delay(1000 / FRAMES_PER_SECOND);
+    }
+    break;
 
     ///////    ANIMATION 2    ///////
 
-    case 2:
+  case 2:
 
-      Serial.println("Splash worms!");
+    Serial.println("Splash worms!");
 
-      animDelay = animDelaySplash;
-      myEnc.write(animDelay);
+    animDelay = animDelaySplash;
+    myEnc.write(animDelay);
 
-      while (mode == 2) {
+    while (mode == 2)
+    {
+      // eight colored dots, weaving in and out of sync with each other
+      fadeToBlackBy(leds, NUM_LEDS, 20);
 
-        // eight colored dots, weaving in and out of sync with each other
-        fadeToBlackBy( leds, NUM_LEDS, 20);
-
-        byte dothue = 0;
-        for ( int i = 0; i < 8; i++) {
-          leds[beatsin16(i + 7, 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
-          dothue += 32;
-
-          FastLED.show();
-          yield(); // needed to prevent soft reset by esp watchdog timer
-
-          long newEncoderPos = constrain((myEnc.read()), minanimDelay, maxanimDelay);
-
-          if (newEncoderPos != oldEncoderPos) {
-            oldEncoderPos = newEncoderPos;
-          }
-          animDelay = newEncoderPos;
-
-        #ifdef DEBUG
-          Serial.print("Mode: ");
-          Serial.print(mode);
-          Serial.print(" | ");
-          Serial.print("Delay: ");
-          Serial.println(animDelay);
-        #endif
-        }
-        server.handleClient();
-        MDNS.update();
-        FastLED.delay(animDelay);
-      }
-      break;
-
-
-    ///////    ANIMATION 3    ///////
-
-    case 3:
-
-      Serial.println("Party Time!");
-
-      uint16_t i;
-      animDelay = animDelayParty;
-      myEnc.write(animDelay);
-      Serial.println(animDelay);
-
-      while (mode == 3) {
-        for (i = 0; i < NUM_LEDS; i++) {
-          leds[i] = CHSV(random8(), 255, 255); // set random color
-        }
+      byte dothue = 0;
+      for (int i = 0; i < 8; i++)
+      {
+        leds[beatsin16(i + 7, 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
+        dothue += 32;
 
         FastLED.show();
+        yield(); // needed to prevent soft reset by esp watchdog timer
 
-        // read animation speed delay from encoder
-        long newEncoderPos = constrain((2 * myEnc.read()), minanimDelay, maxanimDelay);
+        long newEncoderPos = constrain((myEnc.read()), minanimDelay, maxanimDelay);
 
-        if (newEncoderPos != oldEncoderPos) {
+        if (newEncoderPos != oldEncoderPos)
+        {
           oldEncoderPos = newEncoderPos;
         }
         animDelay = newEncoderPos;
 
-        #ifdef DEBUG
-          Serial.print("Mode: ");
-          Serial.print(mode);
-          Serial.print(" | ");
-          Serial.print("Delay: ");
-          Serial.println(animDelay);
-        #endif
+#ifdef DEBUG
+        Serial.print("Mode: ");
+        Serial.print(mode);
+        Serial.print(" | ");
+        Serial.print("Delay: ");
+        Serial.println(animDelay);
+#endif
+      }
+      server.handleClient();
+      MDNS.update();
+      FastLED.delay(animDelay);
+    }
+    break;
 
-        FastLED.delay(animDelay);
+    ///////    ANIMATION 3    ///////
 
-        server.handleClient();
-        MDNS.update();
+  case 3:
 
-      } // end while
-      FastLED.clear();
-      break;
+    Serial.println("Party Time!");
 
+    uint16_t i;
+    animDelay = animDelayParty;
+    myEnc.write(animDelay);
+    Serial.println(animDelay);
+
+    while (mode == 3)
+    {
+      for (i = 0; i < NUM_LEDS; i++)
+      {
+        leds[i] = CHSV(random8(), 255, 255); // set random color
+      }
+
+      FastLED.show();
+
+      // read animation speed delay from encoder
+      long newEncoderPos = constrain((2 * myEnc.read()), minanimDelay, maxanimDelay);
+
+      if (newEncoderPos != oldEncoderPos)
+      {
+        oldEncoderPos = newEncoderPos;
+      }
+      animDelay = newEncoderPos;
+
+#ifdef DEBUG
+      Serial.print("Mode: ");
+      Serial.print(mode);
+      Serial.print(" | ");
+      Serial.print("Delay: ");
+      Serial.println(animDelay);
+#endif
+
+      FastLED.delay(animDelay);
+
+      server.handleClient();
+      MDNS.update();
+
+    } // end while
+    FastLED.clear();
+    break;
 
     ///////    ANIMATION 4    ///////
 
@@ -401,120 +406,132 @@ void loop() {
     //
     //  -Mark Kriegsman, December 2014
 
-    case 4:
+  case 4:
 
-      Serial.println("Twinkling Lights!");
+    Serial.println("Twinkling Lights!");
 
-      animDelay = animDelaytwinkle;
-      myEnc.write(animDelay);
+    animDelay = animDelaytwinkle;
+    myEnc.write(animDelay);
 
-      while (mode == 4) {
+    while (mode == 4)
+    {
+      chooseColorPalette();
+      colortwinkles();
+      FastLED.show();
+      FastLED.delay(animDelay);
 
-        chooseColorPalette();
-        colortwinkles();
-        FastLED.show();
-        FastLED.delay(animDelay);
-
-        long newEncoderPos = constrain((myEnc.read() / 3), minanimDelay, maxanimDelay);
-        if (newEncoderPos != oldEncoderPos) {
-          oldEncoderPos = newEncoderPos;
-        }
-        animDelay = newEncoderPos;
-
-        #ifdef DEBUG
-          Serial.print("Mode: ");
-          Serial.print(mode);
-          Serial.print(" | ");
-          Serial.print("Delay: ");
-          Serial.println(animDelay);
-        #endif
-
-        server.handleClient();
-        MDNS.update();
-        FastLED.delay(animDelay);
+      long newEncoderPos = constrain((myEnc.read() / 3), minanimDelay, maxanimDelay);
+      if (newEncoderPos != oldEncoderPos)
+      {
+        oldEncoderPos = newEncoderPos;
       }
-      break;
+      animDelay = newEncoderPos;
 
-    ///////    ANIMATION 4    ///////
-
-    case 5:
-
-      Serial.println("Rainbow!");
-
-      animDelay = animDelayRainbow;
-      myEnc.write(animDelay);
+#ifdef DEBUG
+      Serial.print("Mode: ");
+      Serial.print(mode);
+      Serial.print(" | ");
+      Serial.print("Delay: ");
       Serial.println(animDelay);
+#endif
 
-      while (mode == 5) {
-        yield();
-        uint32_t ms = millis();
-        int32_t yHueDelta32 = ((int32_t)cos16( ms * 27 ) * (350 / NUM_COLS));
-        int32_t xHueDelta32 = ((int32_t)cos16( ms * 39 ) * (310 / NUM_ROWS));
-        DrawOneFrame( ms / 65536, yHueDelta32 / 32768, xHueDelta32 / 32768);
-        FastLED.show();
+      server.handleClient();
+      MDNS.update();
+      FastLED.delay(animDelay);
+    }
+    break;
 
-        long newEncoderPos = constrain((myEnc.read() / 3), minanimDelay, maxanimDelay);
+    ///////    ANIMATION 5    ///////
 
-        if (newEncoderPos != oldEncoderPos) {
-          oldEncoderPos = newEncoderPos;
-        }
-        animDelay = newEncoderPos;
-        FastLED.delay(animDelay);
+  case 5:
 
-        #ifdef DEBUG
-          Serial.print("Mode: ");
-          Serial.print(mode);
-          Serial.print(" | ");
-          Serial.print("Delay: ");
-          Serial.println(animDelay);
-        #endif
+    Serial.println("Rainbow!");
 
-        server.handleClient();
-        MDNS.update();
+    animDelay = animDelayRainbow;
+    myEnc.write(animDelay);
+    Serial.println(animDelay);
+
+    while (mode == 5)
+    {
+      yield();
+      uint32_t ms = millis();
+      int32_t yHueDelta32 = ((int32_t)cos16(ms * 27) * (350 / NUM_COLS));
+      int32_t xHueDelta32 = ((int32_t)cos16(ms * 39) * (310 / NUM_ROWS));
+      DrawOneFrame(ms / 65536, yHueDelta32 / 32768, xHueDelta32 / 32768);
+      FastLED.show();
+
+      long newEncoderPos = constrain((myEnc.read() / 3), minanimDelay, maxanimDelay);
+
+      if (newEncoderPos != oldEncoderPos)
+      {
+        oldEncoderPos = newEncoderPos;
       }
-      break;
+      animDelay = newEncoderPos;
+      FastLED.delay(animDelay);
 
-    case 6:
-      Serial.println("Fire!");
+#ifdef DEBUG
+      Serial.print("Mode: ");
+      Serial.print(mode);
+      Serial.print(" | ");
+      Serial.print("Delay: ");
+      Serial.println(animDelay);
+#endif
 
-      while (mode == 6) {
-        Fire2012();
+      server.handleClient();
+      MDNS.update();
+    }
+    break;
 
-        server.handleClient();
-        MDNS.update();
-      }
-      break;
+  case 6:
+    Serial.println("Fire!");
 
+    while (mode == 6)
+    {
+      Fire2012();
 
-  }   // end switch
-}     // end main loop
+      server.handleClient();
+      MDNS.update();
+    }
+    break;
 
-void DrawOneFrame( byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
+  } // end switch
+} // end main loop
+
+void DrawOneFrame(byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
 {
   byte lineStartHue = startHue8;
-  for ( byte y = 0; y < NUM_ROWS; y++) {
+  for (byte y = 0; y < NUM_ROWS; y++)
+  {
     lineStartHue += yHueDelta8;
     byte pixelHue = lineStartHue;
-    for ( byte x = 0; x < NUM_COLS; x++) {
+    for (byte x = 0; x < NUM_COLS; x++)
+    {
       pixelHue += xHueDelta8;
-      leds[ XY(x, y)]  = CHSV( pixelHue, 255, 255);
+      leds[XY(x, y)] = CHSV(pixelHue, 255, 255);
     }
   }
 }
+
 // Helper function that translates from x, y into an index into the LED array
 // Handles both 'row order' and 'serpentine' pixel layouts.
-uint16_t XY( uint8_t x, uint8_t y)
+uint16_t XY(uint8_t x, uint8_t y)
 {
   uint16_t i;
 
-  if ( gReverseDirection == false) {
+  if (gReverseDirection == false)
+  {
     i = (y * NUM_COLS) + x;
-  } else {
-    if ( y & 0x01) {
+  }
+  else
+  {
+    if (y & 0x01)
+    {
       // Odd rows run backwards
       uint8_t reverseX = (NUM_COLS - 1) - x;
       i = (y * NUM_COLS) + reverseX;
-    } else {
+    }
+    else
+    {
       // Even rows run forwards
       i = (y * NUM_COLS) + x;
     }
@@ -547,7 +564,7 @@ uint16_t XY( uint8_t x, uint8_t y)
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
 // Default 50, suggested range 20-100
-#define COOLING  55
+#define COOLING 55
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
@@ -560,28 +577,35 @@ void Fire2012()
   static byte heat[NUM_LEDS];
 
   // Step 1.  Cool down every cell a little
-  for ( int i = 0; i < NUM_LEDS; i++) {
-    heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    heat[i] = qsub8(heat[i], random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
   }
 
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for ( int k = NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+  for (int k = NUM_LEDS - 1; k >= 2; k--)
+  {
+    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
   }
 
   // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-  if ( random8() < SPARKING ) {
+  if (random8() < SPARKING)
+  {
     int y = random8(7);
-    heat[y] = qadd8( heat[y], random8(160, 255) );
+    heat[y] = qadd8(heat[y], random8(160, 255));
   }
 
   // Step 4.  Map from heat cells to LED colors
-  for ( int j = 0; j < NUM_LEDS; j++) {
-    CRGB color = HeatColor( heat[j]);
+  for (int j = 0; j < NUM_LEDS; j++)
+  {
+    CRGB color = HeatColor(heat[j]);
     int pixelnumber;
-    if ( gReverseDirection ) {
+    if (gReverseDirection)
+    {
       pixelnumber = (NUM_LEDS - 1) - j;
-    } else {
+    }
+    else
+    {
       pixelnumber = j;
     }
     leds[pixelnumber] = color;
@@ -590,14 +614,12 @@ void Fire2012()
   FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 
-
 void rainbow()
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 5);
+  fill_rainbow(leds, NUM_LEDS, gHue, 5);
   FastLED.show(); // display this frame
 }
-
 
 /// Routines for animation tinkling lights ///
 
@@ -611,55 +633,67 @@ void chooseColorPalette()
 
   CRGB r(CRGB::Red), b(CRGB::Blue), w(85, 85, 85), g(CRGB::Green), W(CRGB::White), l(0xE1A024);
 
-  switch ( whichPalette) {
-    case 0: // Red, Green, and White
-      gPalette = CRGBPalette16( r, r, r, r, r, r, r, r, g, g, g, g, w, w, w, w );
-      break;
-    case 1: // Blue and White
-      //gPalette = CRGBPalette16( b,b,b,b, b,b,b,b, w,w,w,w, w,w,w,w );
-      gPalette = CloudColors_p; // Blues and whites!
-      break;
-    case 2: // Rainbow of colors
-      gPalette = RainbowColors_p;
-      break;
-    case 3: // Incandescent "fairy lights"
-      gPalette = CRGBPalette16( l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l );
-      break;
-    case 4: // Snow
-      gPalette = CRGBPalette16( W, W, W, W, w, w, w, w, w, w, w, w, w, w, w, w );
-      break;
+  switch (whichPalette)
+  {
+  case 0: // Red, Green, and White
+    gPalette = CRGBPalette16(r, r, r, r, r, r, r, r, g, g, g, g, w, w, w, w);
+    break;
+  case 1: // Blue and White
+    //gPalette = CRGBPalette16( b,b,b,b, b,b,b,b, w,w,w,w, w,w,w,w );
+    gPalette = CloudColors_p; // Blues and whites!
+    break;
+  case 2: // Rainbow of colors
+    gPalette = RainbowColors_p;
+    break;
+  case 3: // Incandescent "fairy lights"
+    gPalette = CRGBPalette16(l, l, l, l, l, l, l, l, l, l, l, l, l, l, l, l);
+    break;
+  case 4: // Snow
+    gPalette = CRGBPalette16(W, W, W, W, w, w, w, w, w, w, w, w, w, w, w, w);
+    break;
   }
 }
 
-enum { GETTING_DARKER = 0, GETTING_BRIGHTER = 1 };
+enum
+{
+  GETTING_DARKER = 0,
+  GETTING_BRIGHTER = 1
+};
 
 void colortwinkles()
 {
   // Make each pixel brighter or darker, depending on
   // its 'direction' flag.
-  brightenOrDarkenEachPixel( FADE_IN_SPEED, FADE_OUT_SPEED);
+  brightenOrDarkenEachPixel(FADE_IN_SPEED, FADE_OUT_SPEED);
 
   // Now consider adding a new random twinkle
-  if ( random8() < DENSITY ) {
+  if (random8() < DENSITY)
+  {
     int pos = random16(NUM_LEDS);
-    if ( !leds[pos]) {
-      leds[pos] = ColorFromPalette( gPalette, random8(), STARTING_BRIGHTNESS, NOBLEND);
+    if (!leds[pos])
+    {
+      leds[pos] = ColorFromPalette(gPalette, random8(), STARTING_BRIGHTNESS, NOBLEND);
       setPixelDirection(pos, GETTING_BRIGHTER);
     }
   }
 }
 
-void brightenOrDarkenEachPixel( fract8 fadeUpAmount, fract8 fadeDownAmount)
+void brightenOrDarkenEachPixel(fract8 fadeUpAmount, fract8 fadeDownAmount)
 {
-  for ( uint16_t i = 0; i < NUM_LEDS; i++) {
-    if ( getPixelDirection(i) == GETTING_DARKER) {
+  for (uint16_t i = 0; i < NUM_LEDS; i++)
+  {
+    if (getPixelDirection(i) == GETTING_DARKER)
+    {
       // This pixel is getting darker
-      leds[i] = makeDarker( leds[i], fadeDownAmount);
-    } else {
+      leds[i] = makeDarker(leds[i], fadeDownAmount);
+    }
+    else
+    {
       // This pixel is getting brighter
-      leds[i] = makeBrighter( leds[i], fadeUpAmount);
+      leds[i] = makeBrighter(leds[i], fadeUpAmount);
       // now check to see if we've maxxed out the brightness
-      if ( leds[i].r == 255 || leds[i].g == 255 || leds[i].b == 255) {
+      if (leds[i].r == 255 || leds[i].g == 255 || leds[i].b == 255)
+      {
         // if so, turn around and start getting darker
         setPixelDirection(i, GETTING_DARKER);
       }
@@ -667,51 +701,54 @@ void brightenOrDarkenEachPixel( fract8 fadeUpAmount, fract8 fadeDownAmount)
   }
 }
 
-CRGB makeBrighter( const CRGB& color, fract8 howMuchBrighter)
+CRGB makeBrighter(const CRGB &color, fract8 howMuchBrighter)
 {
   CRGB incrementalColor = color;
-  incrementalColor.nscale8( howMuchBrighter);
+  incrementalColor.nscale8(howMuchBrighter);
   return color + incrementalColor;
 }
 
-CRGB makeDarker( const CRGB& color, fract8 howMuchDarker)
+CRGB makeDarker(const CRGB &color, fract8 howMuchDarker)
 {
   CRGB newcolor = color;
-  newcolor.nscale8( 255 - howMuchDarker);
+  newcolor.nscale8(255 - howMuchDarker);
   return newcolor;
 }
 
-uint8_t  directionFlags[ (NUM_LEDS + 7) / 8];
+uint8_t directionFlags[(NUM_LEDS + 7) / 8];
 
-bool getPixelDirection( uint16_t i) {
+bool getPixelDirection(uint16_t i)
+{
   uint16_t index = i / 8;
-  uint8_t  bitNum = i & 0x07;
-  return bitRead( directionFlags[index], bitNum);
+  uint8_t bitNum = i & 0x07;
+  return bitRead(directionFlags[index], bitNum);
 }
-void setPixelDirection( uint16_t i, bool dir) {
+void setPixelDirection(uint16_t i, bool dir)
+{
   uint16_t index = i / 8;
-  uint8_t  bitNum = i & 0x07;
-  bitWrite( directionFlags[index], bitNum, dir);
+  uint8_t bitNum = i & 0x07;
+  bitWrite(directionFlags[index], bitNum, dir);
 }
-
-
 
 /////  I2C + SWITCH SUBROUTINES  /////
 
-ICACHE_RAM_ATTR void changeMode() {
+ICACHE_RAM_ATTR void changeMode()
+{
   // changes mode after encoder button is pressed
 
   mode = mode + 1;
-  if (mode > maxModes) mode = 1;
-  if (mode < 1) mode = maxModes;
+  if (mode > maxModes)
+    mode = 1;
+  if (mode < 1)
+    mode = maxModes;
 
   //delay(1000);
   //Serial.print("Switched to Modus: ");
   //Serial.println(mode);
 }
 
+// Build the WebInterface
 String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
-// String SendHTML(uint8_t mode)
 {
   String html = "<!DOCTYPE html> <html>\n";
   html += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
