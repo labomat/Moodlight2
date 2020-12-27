@@ -38,7 +38,7 @@ const int maxModes = 6;     // number of modes (cycling, starting from 1 so 4 mo
 
 // FastLED definitions
 
-#define FASTLED_ALLOW_INTERRUPTS 0 // needed to work 
+#define FASTLED_ALLOW_INTERRUPTS 0 // needed to work
 #include <FastLED.h>        // FastLED Animation library
 
 #define LED_PIN D3          // controlpin for ws2812
@@ -96,18 +96,27 @@ void handleSet() {
   // main function to handle control commands from web to device
 
   String message = "";
-  if (server.arg("mode") == "") {   // Animation mode
+
+  // Animation mode
+  if (server.arg("mode") == "")
+  {
     message = "no-mode";
-  } else {    //Parameter found
+  }
+  else
+  {
     message = "Mode = ";
     message += server.arg("mode");
 
     mode = server.arg("mode").toInt();
   }
 
-  if (server.arg("bright") == "") {   // LED brightness
+  // LED brightness
+  if (server.arg("bright") == "")
+  {
     message += " no-brightness";
-  } else {    //Parameter found
+  }
+  else
+  {
     message += " Brightness = ";
     message += server.arg("bright");
 
@@ -115,16 +124,20 @@ void handleSet() {
     FastLED.setBrightness(brightness);
   }
 
-  if (server.arg("hue") == "") {   // Color hue for flat color display
+  // Color hue for flat color display
+  if (server.arg("hue") == "")
+  {
     message += " no-hue";
-  } else {    //Parameter found
+  }
+  else
+  {
     message += " Hue = ";
     message += server.arg("hue");
 
     fHue = server.arg("hue").toInt();
   }
 
-  server.send(200, "text/plain", message);          //Returns the HTTP response
+  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
 }
 
 void handleNotFound() {
@@ -189,7 +202,7 @@ void setup() {
         type = "sketch";
       else // U_SPIFFS
         type = "filesystem";
-  
+
       // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
       Serial.println("Start updating " + type);
     });
@@ -208,7 +221,7 @@ void setup() {
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
     });
     ArduinoOTA.begin();
-  
+
     Serial.println("Moodlight2 ready!");
 
   // starting server
@@ -445,7 +458,7 @@ void loop() {
         }
         animDelay = newEncoderPos;
         FastLED.delay(animDelay);
-        
+
         #ifdef DEBUG
           Serial.print("Mode: ");
           Serial.print(mode);
@@ -693,4 +706,37 @@ ICACHE_RAM_ATTR void changeMode() {
   //delay(1000);
   //Serial.print("Switched to Modus: ");
   //Serial.println(mode);
+}
+
+String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
+// String SendHTML(uint8_t mode)
+{
+  String html = "<!DOCTYPE html> <html>\n";
+  html += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+  html += "<title>Moodlight Control</title>\n";
+  html += "<style>html { font-family: Helvetica; display: inline-block; margin: 0 auto; text-align: center;}\n";
+  html += "body{color: #444;margin-top: 50px;} h1 {margin: 50px auto 30px;} h3 {margin-bottom: 50px;}\n";
+  html += ".button {display: block;background-color: #1abc9c;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
+  html += ".button {background-color: #34495e;}\n";
+  html += ".button:hover {background-color: #2c3e50;}\n";
+  html += (String) ".mode-" + mode + " .mode-" + mode + ".button {background-color: #1abc9c;}\n";
+  html += (String) ".mode-" + mode + " .mode-" + mode + ".button:hover {background-color: #16a085;}\n";
+  html += "p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
+  html += "</style>\n";
+  html += "</head>\n";
+  html += (String) "<body class=\"mode-" + mode + "\">\n";
+
+  html += "<h1>Moodlight Control</h1>\n";
+  html += (String) "<h2>Actual Mode: " + mode + " - Brightness: " + brightness + " - Color: " + fHue + "</h2>\n";
+
+  html += "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1\">Flat Color</a>\n";
+  html += "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2\">Splash worms</a>\n";
+  html += "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3\">Party Time</a>\n";
+  html += "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4\">Twinkling Lights</a>\n";
+  html += "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5\">Rainbow</a>\n";
+  html += "<p>Mode = 6</p><a class=\"mode-6 button\" href=\"/set?mode=6\">Fireplace</a>\n";
+
+  html += "</body>\n";
+  html += "</html>\n";
+  return html;
 }
