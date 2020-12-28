@@ -262,7 +262,7 @@ void loop()
 
   case 1:
 
-    Serial.println("Flat Color");
+    Serial.println("Flat Color!");
 
     myEnc.write(fHue);
 
@@ -489,6 +489,8 @@ void loop()
       MDNS.update();
     }
     break;
+
+    ///////    ANIMATION 6    ///////
 
   case 6:
     Serial.println("Fire!");
