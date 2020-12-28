@@ -306,7 +306,7 @@ void loop()
 
   case 2:
 
-    Serial.println("Splash worms!");
+    Serial.println("Splash!");
 
     animDelay = animDelaySplash;
     myEnc.write(animDelay);
@@ -782,7 +782,7 @@ String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
   html += (String) "<h2>Actual Mode: " + mode + " - Brightness: " + brightness + " - Color: " + fHue + "</h2>\n";
 
   html += (String) "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1&hue=" + fHue + "&bright=" + brightness + "\">Flat Color</a>\n";
-  html += (String) "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2&hue=" + fHue + "&bright=" + brightness + "\">Splash worms</a>\n";
+  html += (String) "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2&hue=" + fHue + "&bright=" + brightness + "\">Splash</a>\n";
   html += (String) "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3&hue=" + fHue + "&bright=" + brightness + "\">Party Time</a>\n";
   html += (String) "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4&hue=" + fHue + "&bright=" + brightness + "\">Twinkling Lights</a>\n";
   html += (String) "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5&hue=" + fHue + "&bright=" + brightness + "\">Rainbow</a>\n";
