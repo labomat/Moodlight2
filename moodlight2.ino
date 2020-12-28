@@ -781,12 +781,12 @@ String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
   html += "<h1>Moodlight Control</h1>\n";
   html += (String) "<h2>Actual Mode: " + mode + " - Brightness: " + brightness + " - Color: " + fHue + "</h2>\n";
 
-  html += "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1\">Flat Color</a>\n";
-  html += "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2\">Splash worms</a>\n";
-  html += "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3\">Party Time</a>\n";
-  html += "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4\">Twinkling Lights</a>\n";
-  html += "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5\">Rainbow</a>\n";
-  html += "<p>Mode = 6</p><a class=\"mode-6 button\" href=\"/set?mode=6\">Fireplace</a>\n";
+  html += (String) "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1&hue=" + fHue + "&bright=" + brightness + "\">Flat Color</a>\n";
+  html += (String) "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2&hue=" + fHue + "&bright=" + brightness + "\">Splash worms</a>\n";
+  html += (String) "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3&hue=" + fHue + "&bright=" + brightness + "\">Party Time</a>\n";
+  html += (String) "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4&hue=" + fHue + "&bright=" + brightness + "\">Twinkling Lights</a>\n";
+  html += (String) "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5&hue=" + fHue + "&bright=" + brightness + "\">Rainbow</a>\n";
+  html += (String) "<p>Mode = 6</p><a class=\"mode-6 button\" href=\"/set?mode=6&hue=" + fHue + "&bright=" + brightness + "\">Fireplace</a>\n";
 
   html += "</body>\n";
   html += "</html>\n";
