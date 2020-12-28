@@ -282,8 +282,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        fHue = 3 * newEncoderPos;
       }
-      fHue = 3 * newEncoderPos;
 #ifdef DEBUG
       Serial.print("Mode: ");
       Serial.print(mode);
