@@ -42,16 +42,16 @@ const int maxModes = 6;       // number of modes (cycling, starting from 1 so 4 
 
 #define LED_PIN D0 // controlpin for ws2812
 
-//#define TEST // test matrix with 8x8 pixel
+// #define TEST // test matrix with 8x8 pixel
 
-#ifdef TEST 
-  #define NUM_ROWS 8  // number of rows in matrix
-  #define NUM_COLS 8  // number of cols in matrix
-  #define NUM_LEDS 64 // number of leds in matrix
+#ifdef TEST
+#define NUM_ROWS 8  // number of rows in matrix
+#define NUM_COLS 8  // number of cols in matrix
+#define NUM_LEDS 64 // number of leds in matrix
 #else
-  #define NUM_ROWS 11  // number of rows in matrix
-  #define NUM_COLS 11  // number of cols in matrix
-  #define NUM_LEDS 121 // number of leds in matrix
+#define NUM_ROWS 11  // number of rows in matrix
+#define NUM_COLS 11  // number of cols in matrix
+#define NUM_LEDS 121 // number of leds in matrix
 #endif
 
 #define COLOR_ORDER GRB
@@ -84,7 +84,7 @@ bool gReverseDirection = true; // for twinkling animation
 
 byte led = 13;
 
-#define DEBUG // Debugging on
+// #define DEBUG // Debugging on
 
 // web server configuration
 
@@ -93,7 +93,7 @@ ESP8266WebServer server(80);
 void handleRoot()
 {
   digitalWrite(led, 1);
-  server.send(200, "text/plain", "hello from esp8266!");
+  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
   digitalWrite(led, 0);
 }
 
@@ -262,7 +262,7 @@ void loop()
 
   case 1:
 
-    Serial.println("Flat Color");
+    Serial.println("Flat Color!");
 
     myEnc.write(fHue);
 
@@ -282,8 +282,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        fHue = 3 * newEncoderPos;
       }
-      fHue = 3 * newEncoderPos;
 #ifdef DEBUG
       Serial.print("Mode: ");
       Serial.print(mode);
@@ -330,8 +330,8 @@ void loop()
         if (newEncoderPos != oldEncoderPos)
         {
           oldEncoderPos = newEncoderPos;
+          animDelay = newEncoderPos;
         }
-        animDelay = newEncoderPos;
 
 #ifdef DEBUG
         Serial.print("Mode: ");
@@ -373,8 +373,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
 
 #ifdef DEBUG
       Serial.print("Mode: ");
@@ -432,8 +432,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
 
 #ifdef DEBUG
       Serial.print("Mode: ");
@@ -473,8 +473,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
       FastLED.delay(animDelay);
 
 #ifdef DEBUG
@@ -489,6 +489,8 @@ void loop()
       MDNS.update();
     }
     break;
+
+    ///////    ANIMATION 6    ///////
 
   case 6:
     Serial.println("Fire!");
