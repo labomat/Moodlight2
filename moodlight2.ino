@@ -330,8 +330,8 @@ void loop()
         if (newEncoderPos != oldEncoderPos)
         {
           oldEncoderPos = newEncoderPos;
+          animDelay = newEncoderPos;
         }
-        animDelay = newEncoderPos;
 
 #ifdef DEBUG
         Serial.print("Mode: ");
@@ -373,8 +373,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
 
 #ifdef DEBUG
       Serial.print("Mode: ");
@@ -432,8 +432,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
 
 #ifdef DEBUG
       Serial.print("Mode: ");
@@ -473,8 +473,8 @@ void loop()
       if (newEncoderPos != oldEncoderPos)
       {
         oldEncoderPos = newEncoderPos;
+        animDelay = newEncoderPos;
       }
-      animDelay = newEncoderPos;
       FastLED.delay(animDelay);
 
 #ifdef DEBUG
