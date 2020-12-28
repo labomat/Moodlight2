@@ -29,7 +29,7 @@
 
 Encoder myEnc(D1, D2); // initialize Encoder
 long oldEncoderPos = 0;
-#define SWITCH_PIN D7 // rotary encoder switch pin
+#define SWITCH_PIN D3 // rotary encoder switch pin
 
 Bounce modeSwitch = Bounce(); // Instantiate Bounce object
 int mode = 4;                 // animation modes
