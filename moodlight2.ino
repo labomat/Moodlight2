@@ -11,15 +11,15 @@
     CC-BY SA 2020/21 Kai Laborenz
 
 */
-
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>  // ota updates
-#include <strings_en.h>  // wifi manager
-#include <WiFiManager.h> // wifi manager
+//
+//#include <ESP8266WiFi.h>
+//#include <WiFiClient.h>
+//#include <ESP8266WebServer.h>
+//#include <ESP8266mDNS.h>
+//#include <WiFiUdp.h>
+//#include <ArduinoOTA.h>  // ota updates
+//#include <strings_en.h>  // wifi manager
+//#include <WiFiManager.h> // wifi manager
 
 #include <Encoder.h> // Rotary encoder
 // to enable Encoder library to work with wemos d1 I had to replace Encoder.h with
@@ -88,92 +88,92 @@ byte led = 13;
 
 // web server configuration
 
-ESP8266WebServer server(80);
-
-void handleRoot()
-{
-  digitalWrite(led, 1);
-  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
-  digitalWrite(led, 0);
-}
-
-void handleSet()
-{
-  // main function to handle control commands from web to device
-
-  String message = "";
-
-  // Animation mode
-  if (server.arg("mode") == "")
-  {
-    message = "no-mode";
-  }
-  else
-  {
-    message = "Mode = ";
-    message += server.arg("mode");
-
-    mode = server.arg("mode").toInt();
-  }
-
-  // LED brightness
-  if (server.arg("bright") == "")
-  {
-    message += " no-brightness";
-  }
-  else
-  {
-    message += " Brightness = ";
-    message += server.arg("bright");
-
-    brightness = server.arg("bright").toInt();
-    FastLED.setBrightness(brightness);
-  }
-
-  // Color hue for flat color display
-  if (server.arg("hue") == "")
-  {
-    message += " no-hue";
-  }
-  else
-  {
-    message += " Hue = ";
-    message += server.arg("hue");
-
-    fHue = server.arg("hue").toInt();
-  }
-
-  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
-}
-
-void handleNotFound()
-{
-  digitalWrite(led, 1);
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++)
-  {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
-}
+//ESP8266WebServer server(80);
+//
+//void handleRoot()
+//{
+//  digitalWrite(led, 1);
+//  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
+//  digitalWrite(led, 0);
+//}
+//
+//void handleSet()
+//{
+//  // main function to handle control commands from web to device
+//
+//  String message = "";
+//
+//  // Animation mode
+//  if (server.arg("mode") == "")
+//  {
+//    message = "no-mode";
+//  }
+//  else
+//  {
+//    message = "Mode = ";
+//    message += server.arg("mode");
+//
+//    mode = server.arg("mode").toInt();
+//  }
+//
+//  // LED brightness
+//  if (server.arg("bright") == "")
+//  {
+//    message += " no-brightness";
+//  }
+//  else
+//  {
+//    message += " Brightness = ";
+//    message += server.arg("bright");
+//
+//    brightness = server.arg("bright").toInt();
+//    FastLED.setBrightness(brightness);
+//  }
+//
+//  // Color hue for flat color display
+//  if (server.arg("hue") == "")
+//  {
+//    message += " no-hue";
+//  }
+//  else
+//  {
+//    message += " Hue = ";
+//    message += server.arg("hue");
+//
+//    fHue = server.arg("hue").toInt();
+//  }
+//
+//  server.send(200, "text/html", SendHTML(mode, brightness, fHue));
+//}
+//
+//void handleNotFound()
+//{
+//  digitalWrite(led, 1);
+//  String message = "File Not Found\n\n";
+//  message += "URI: ";
+//  message += server.uri();
+//  message += "\nMethod: ";
+//  message += (server.method() == HTTP_GET) ? "GET" : "POST";
+//  message += "\nArguments: ";
+//  message += server.args();
+//  message += "\n";
+//  for (uint8_t i = 0; i < server.args(); i++)
+//  {
+//    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+//  }
+//  server.send(404, "text/plain", message);
+//  digitalWrite(led, 0);
+//}
 
 void setup()
 {
   Serial.begin(115200);
 
   // switch for mode change with rotary encoder push button
-  pinMode(SWITCH_PIN, INPUT_PULLUP);
-  attachInterrupt(SWITCH_PIN, changeMode, RISING);
-  modeSwitch.attach(SWITCH_PIN);
-  modeSwitch.interval(5); // interval in
+pinMode(SWITCH_PIN, INPUT_PULLUP);
+attachInterrupt(SWITCH_PIN, changeMode, RISING);
+modeSwitch.attach(SWITCH_PIN);
+modeSwitch.interval(5); // interval in
 
   // start LED library and set default brightness
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -182,8 +182,8 @@ void setup()
   Serial.println("Booting Moodlight 2 ...");
 
   // Starting wifi manager
-  WiFiManager wifiManager;
-  wifiManager.autoConnect("MOODLIGHT2");
+//  WiFiManager wifiManager;
+//  wifiManager.autoConnect("MOODLIGHT2");
 
   // starting ota update capability
 
@@ -200,57 +200,57 @@ void setup()
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
 
-  ArduinoOTA.onStart([]() {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
-
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    Serial.println("Start updating " + type);
-  });
-
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR)
-      Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR)
-      Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
+//  ArduinoOTA.onStart([]() {
+//    String type;
+//    if (ArduinoOTA.getCommand() == U_FLASH)
+//      type = "sketch";
+//    else // U_SPIFFS
+//      type = "filesystem";
+//
+//    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+//    Serial.println("Start updating " + type);
+//  });
+//
+//  ArduinoOTA.onEnd([]() {
+//    Serial.println("\nEnd");
+//  });
+//
+//  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+//    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+//  });
+//
+//  ArduinoOTA.onError([](ota_error_t error) {
+//    Serial.printf("Error[%u]: ", error);
+//    if (error == OTA_AUTH_ERROR)
+//      Serial.println("Auth Failed");
+//    else if (error == OTA_BEGIN_ERROR)
+//      Serial.println("Begin Failed");
+//    else if (error == OTA_CONNECT_ERROR)
+//      Serial.println("Connect Failed");
+//    else if (error == OTA_RECEIVE_ERROR)
+//      Serial.println("Receive Failed");
+//    else if (error == OTA_END_ERROR)
+//      Serial.println("End Failed");
+//  });
+//
+//  ArduinoOTA.begin();
 
   Serial.println("Moodlight2 ready!");
 
   // starting server
-  if (MDNS.begin("esp8266"))
-  {
-    Serial.println("MDNS responder started");
-  }
-
-  // server commands
-  server.on("/", handleRoot);   // default web page
-  server.on("/set", handleSet); // set mode
-  server.onNotFound(handleNotFound);
-
-  server.begin();
-  Serial.println("HTTP server started");
-  delay(1000);
+//  if (MDNS.begin("esp8266"))
+//  {
+//    Serial.println("MDNS responder started");
+//  }
+//
+//  // server commands
+//  server.on("/", handleRoot);   // default web page
+//  server.on("/set", handleSet); // set mode
+//  server.onNotFound(handleNotFound);
+//
+//  server.begin();
+//  Serial.println("HTTP server started");
+//  delay(1000);
 }
 
 void loop()
@@ -293,10 +293,10 @@ void loop()
 #endif
 
       FastLED.show();
-      ArduinoOTA.handle();
-
-      server.handleClient();
-      MDNS.update();
+//      ArduinoOTA.handle();
+//
+//      server.handleClient();
+//      MDNS.update();
 
       FastLED.delay(1000 / FRAMES_PER_SECOND);
     }
@@ -341,8 +341,8 @@ void loop()
         Serial.println(animDelay);
 #endif
       }
-      server.handleClient();
-      MDNS.update();
+//      server.handleClient();
+//      MDNS.update();
       FastLED.delay(animDelay);
     }
     break;
@@ -386,8 +386,8 @@ void loop()
 
       FastLED.delay(animDelay);
 
-      server.handleClient();
-      MDNS.update();
+//      server.handleClient();
+//      MDNS.update();
 
     } // end while
     FastLED.clear();
@@ -443,8 +443,8 @@ void loop()
       Serial.println(animDelay);
 #endif
 
-      server.handleClient();
-      MDNS.update();
+//      server.handleClient();
+//      MDNS.update();
       FastLED.delay(animDelay);
     }
     break;
@@ -485,8 +485,8 @@ void loop()
       Serial.println(animDelay);
 #endif
 
-      server.handleClient();
-      MDNS.update();
+//      server.handleClient();
+//      MDNS.update();
     }
     break;
 
@@ -501,8 +501,8 @@ void loop()
     {
       Fire2012();
 
-      server.handleClient();
-      MDNS.update();
+//      server.handleClient();
+//      MDNS.update();
     }
     gReverseDirection = true;
     break;
@@ -761,34 +761,34 @@ ICACHE_RAM_ATTR void changeMode()
 }
 
 // Build the WebInterface
-String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
-{
-  String html = "<!DOCTYPE html> <html>\n";
-  html += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-  html += "<title>Moodlight Control</title>\n";
-  html += "<style>html { font-family: Helvetica; display: inline-block; margin: 0 auto; text-align: center;}\n";
-  html += "body{color: #444;margin-top: 50px;} h1 {margin: 50px auto 30px;} h3 {margin-bottom: 50px;}\n";
-  html += ".button {display: block;background-color: #1abc9c;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
-  html += ".button {background-color: #34495e;}\n";
-  html += ".button:hover {background-color: #2c3e50;}\n";
-  html += (String) ".mode-" + mode + " .mode-" + mode + ".button {background-color: #1abc9c;}\n";
-  html += (String) ".mode-" + mode + " .mode-" + mode + ".button:hover {background-color: #16a085;}\n";
-  html += "p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
-  html += "</style>\n";
-  html += "</head>\n";
-  html += (String) "<body class=\"mode-" + mode + "\">\n";
-
-  html += "<h1>Moodlight Control</h1>\n";
-  html += (String) "<h2>Actual Mode: " + mode + " - Brightness: " + brightness + " - Color: " + fHue + "</h2>\n";
-
-  html += (String) "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1&hue=" + fHue + "&bright=" + brightness + "\">Flat Color</a>\n";
-  html += (String) "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2&hue=" + fHue + "&bright=" + brightness + "\">Splash</a>\n";
-  html += (String) "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3&hue=" + fHue + "&bright=" + brightness + "\">Party Time</a>\n";
-  html += (String) "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4&hue=" + fHue + "&bright=" + brightness + "\">Twinkling Lights</a>\n";
-  html += (String) "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5&hue=" + fHue + "&bright=" + brightness + "\">Rainbow</a>\n";
-  html += (String) "<p>Mode = 6</p><a class=\"mode-6 button\" href=\"/set?mode=6&hue=" + fHue + "&bright=" + brightness + "\">Fireplace</a>\n";
-
-  html += "</body>\n";
-  html += "</html>\n";
-  return html;
-}
+//String SendHTML(uint8_t mode, uint8_t brightness, uint8_t fHue)
+//{
+//  String html = "<!DOCTYPE html> <html>\n";
+//  html += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
+//  html += "<title>Moodlight Control</title>\n";
+//  html += "<style>html { font-family: Helvetica; display: inline-block; margin: 0 auto; text-align: center;}\n";
+//  html += "body{color: #444;margin-top: 50px;} h1 {margin: 50px auto 30px;} h3 {margin-bottom: 50px;}\n";
+//  html += ".button {display: block;background-color: #1abc9c;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
+//  html += ".button {background-color: #34495e;}\n";
+//  html += ".button:hover {background-color: #2c3e50;}\n";
+//  html += (String) ".mode-" + mode + " .mode-" + mode + ".button {background-color: #1abc9c;}\n";
+//  html += (String) ".mode-" + mode + " .mode-" + mode + ".button:hover {background-color: #16a085;}\n";
+//  html += "p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
+//  html += "</style>\n";
+//  html += "</head>\n";
+//  html += (String) "<body class=\"mode-" + mode + "\">\n";
+//
+//  html += "<h1>Moodlight Control</h1>\n";
+//  html += (String) "<h2>Actual Mode: " + mode + " - Brightness: " + brightness + " - Color: " + fHue + "</h2>\n";
+//
+//  html += (String) "<p>Mode = 1</p><a class=\"mode-1 button\" href=\"/set?mode=1&hue=" + fHue + "&bright=" + brightness + "\">Flat Color</a>\n";
+//  html += (String) "<p>Mode = 2</p><a class=\"mode-2 button\" href=\"/set?mode=2&hue=" + fHue + "&bright=" + brightness + "\">Splash</a>\n";
+//  html += (String) "<p>Mode = 3</p><a class=\"mode-3 button\" href=\"/set?mode=3&hue=" + fHue + "&bright=" + brightness + "\">Party Time</a>\n";
+//  html += (String) "<p>Mode = 4</p><a class=\"mode-4 button\" href=\"/set?mode=4&hue=" + fHue + "&bright=" + brightness + "\">Twinkling Lights</a>\n";
+//  html += (String) "<p>Mode = 5</p><a class=\"mode-5 button\" href=\"/set?mode=5&hue=" + fHue + "&bright=" + brightness + "\">Rainbow</a>\n";
+//  html += (String) "<p>Mode = 6</p><a class=\"mode-6 button\" href=\"/set?mode=6&hue=" + fHue + "&bright=" + brightness + "\">Fireplace</a>\n";
+//
+//  html += "</body>\n";
+//  html += "</html>\n";
+//  return html;
+//}
