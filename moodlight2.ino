@@ -188,7 +188,7 @@ modeSwitch.interval(5); // interval in
   // starting ota update capability
 
   // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
+//   ArduinoOTA.setPort(8266);
 
   // Hostname defaults to esp8266-[ChipID]
   // ArduinoOTA.setHostname("myesp8266");
@@ -293,8 +293,8 @@ void loop()
 #endif
 
       FastLED.show();
+      
 //      ArduinoOTA.handle();
-//
 //      server.handleClient();
 //      MDNS.update();
 
@@ -341,9 +341,11 @@ void loop()
         Serial.println(animDelay);
 #endif
       }
+      FastLED.delay(animDelay);
+      
 //      server.handleClient();
 //      MDNS.update();
-      FastLED.delay(animDelay);
+      
     }
     break;
 
@@ -443,9 +445,11 @@ void loop()
       Serial.println(animDelay);
 #endif
 
+      FastLED.delay(animDelay);
+      
 //      server.handleClient();
 //      MDNS.update();
-      FastLED.delay(animDelay);
+      
     }
     break;
 
